@@ -1,6 +1,7 @@
 from typing import List
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 import missingno as msno
 import pandas as pd
 import numpy as np
@@ -36,6 +37,8 @@ class EDA(Runner):
         """ Runs all EDA utilites"""
         self.get_basic_stats()
         self.visualize_missingness()
+        self.payment_distribution()
+
 
     def get_basic_stats(self) -> None:
         """ Saves basics data stats using pd.describe() with 
@@ -73,9 +76,42 @@ class EDA(Runner):
         X_converted = self.X
         # Convert all elements that dont match zipcode regex to NaNs
         # Temporary conversion from Nan to False to use Series as a bit mask
-        X_mask = ~X_converted["merchantZip"].str.match(zip_code_regex).fillna(False)
+        X_mask = \
+            ~X_converted["merchantZip"].str.match(zip_code_regex).fillna(False)
         X_converted.loc[X_mask, "merchantZip"] = np.nan
         # Visualize missingness distribution
         ax = msno.matrix(X_converted)
         fig = plt.gcf()
         fig.savefig(self.dir_write + "/missingness.png")
+        plt.clf()
+
+    def payment_distribution(self) -> None:
+        """ Visualize payment distribution for data with and without fraud"""
+        std_trans = self.X["transactionAmount"].std()
+        mean_trans = self.X["transactionAmount"].mean()
+        # Whole data
+        fig, ax = plt.subplots(1,2)
+        X_no_outliers = self.X[self.X["transactionAmount"] 
+                               < mean_trans + 3*std_trans]
+        sns.distplot(X_no_outliers["transactionAmount"], ax=ax[0])
+        sns.distplot(self.X["availableCash"], ax=ax[1])
+        fig.savefig(self.dir_write + "/payment_dist.png")
+        plt.clf()
+
+        # Fraudulent data
+        fig, ax = plt.subplots(1,2)
+        X_no_outliers = self.X_fraud[self.X_fraud["transactionAmount"] 
+                                     < mean_trans + 3*std_trans]
+        sns.distplot(X_no_outliers["transactionAmount"], ax=ax[0])
+        sns.distplot(self.X_fraud["availableCash"], ax=ax[1])
+        fig.savefig(self.dir_write + "/payment_dist_fraud.png")
+        plt.clf()
+
+        # Non fraudulent data
+        fig, ax = plt.subplots(1,2)
+        X_no_outliers = self.X_not_fraud[self.X_not_fraud["transactionAmount"]
+                                         < mean_trans + 3*std_trans]
+        sns.distplot(X_no_outliers["transactionAmount"], ax=ax[0])
+        sns.distplot(self.X_not_fraud["availableCash"], ax=ax[1])
+        fig.savefig(self.dir_write + "/payment_dist_not_fraud.png")
+        plt.clf()

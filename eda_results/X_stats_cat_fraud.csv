@@ -1,5 +1,5 @@
 ,transactionTime,eventId,accountNumber,merchantId,mcc,merchantCountry,merchantZip,posEntryMode
 count,875,875,875,875,875,875,314,875
 unique,872,875,167,438,116,28,113,6
-top,2017-07-19T13:00:21Z,19523317A1,8b9c15ea,4fd0ff,5735,826,0,81
+top,2017-07-19T13:00:21Z,242660A1,8b9c15ea,4fd0ff,5735,826,0,81
 freq,2,1,97,49,120,314,74,630
